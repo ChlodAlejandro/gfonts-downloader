@@ -93,23 +93,23 @@ for url in urls:
     print(f"Searching for fonts in {url}...")
     cssr = requests.get(url, allow_redirects=True, headers=headers)
 
-    re_rule = re.compile(r"\/\*\s?([a-zA-Z\-]+)\s?\*\/[^}]*local\('([A-Z\-a-z0-9]+)'\),\s?url\(([0-9A-Za-z:\/.]+)\)[^}]*}\n")
+    re_rule = re.compile(r"\/\*\s?(.*?)\s?\*\/(?:\n|.)*?font-family:\s?'(.*?)'(?:\n|.)*?font-weight:\s?(\d*?);(?:\n|.)*?url\(([0-9A-Za-z:\/._\-]+)\)[^}]*}\n")
     freg = re_rule.findall(cssr.text)
 
     fontCSS = f"/* {url} */\n{cssr.text}"
 
     if freg:
         for furl in freg:
-            if os.path.isfile(f"{fontPath}{furl[1]}-{furl[0]}.woff2") and not options["preserve"]:
-                print(f"{furl[1]} {furl[0]} ({furl[1]}-{furl[0]}.woff2) already exists. Deleting anyway... (use --preserve to keep old files)")
+            if os.path.isfile(f"{fontPath}{furl[1]}@{furl[2]}-{furl[0]}.woff2") and not options["preserve"]:
+                print(f"{furl[1]} {furl[0]} ({furl[1]}@{furl[2]}-{furl[0]}.woff2) already exists. Deleting anyway... (use --preserve to keep old files)")
             elif options["preserve"]:
-                print(f"{furl[1]} {furl[0]} ({furl[1]}-{furl[0]}.woff2) already exists. Skipping download...")
+                print(f"{furl[1]} {furl[0]} ({furl[1]}@{furl[2]}-{furl[0]}.woff2) already exists. Skipping download...")
                 continue
             
-            print(f"Downloading {furl[1]} ({furl[0]}) from \"{furl[2]}\"...")
-            open(f"{fontPath}{furl[1]}-{furl[0]}.woff2", "wb").write(requests.get(furl[2], allow_redirects=True, headers=headers).content)
+            print(f"Downloading {furl[1]}@{furl[2]} ({furl[0]}) from \"{furl[3]}\"...")
+            open(f"{fontPath}{furl[1]}@{furl[2]}-{furl[0]}.woff2", "wb").write(requests.get(furl[3], allow_redirects=True, headers=headers).content)
 
-            fontCSS = fontCSS.replace(furl[2], f"\"{relativeFontPath}{furl[1]}-{furl[0]}.woff2\"")
+            fontCSS = fontCSS.replace(furl[3], f"\"{relativeFontPath}{furl[1]}@{furl[2]}-{furl[0]}.woff2\"")
 
     finalCSS += f"{fontCSS}\n\n"
 
