@@ -6,7 +6,7 @@ import shutil
 import datetime
 
 print("Google Fonts Downloader")
-print("v1.0 - Build 1/30/2020")
+print("v1.1 - Build 7/25/2020")
 print("")
 
 workingPath = "out"
